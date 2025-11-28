@@ -1,0 +1,48 @@
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches: ["main"]   # or your default branch
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true  # Enable Git LFS support
+
+      - name: Set up Pages
+        uses: actions/configure-pages@v4
+
+      # If you need to build something, insert build step here
+      # Example (optional):
+      # - name: Build
+      #   run: |
+      #     npm install
+      #     npm run build
+      # And change the upload path to your output folder (e.g., "./dist")
+
+      - name: Upload static site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."   # Change to "./dist" if you build a website
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
